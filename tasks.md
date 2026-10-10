@@ -128,9 +128,8 @@ Status as of 2026-10-10. The package is `hdmirror` on the `mirror` branch. Every
 removed from that branch; upstream history stays on `main`.
 
 ### A. Fork & environment
-- [ ] Fork on GitHub. **Pending:** `gh` is not installed, so the fork could not be created from here.
-  Remotes are already set up (`origin` = `git@github.com:Nicolas-SG/histdata.com-tools.git`, `upstream` = dmidlo).
-  Create the fork in the GitHub web UI, then run `git push -u origin mirror`.
+- [x] Fork on GitHub: https://github.com/Nicolas-SG/histdata.com-tools (created 2026-10-10 with `gh`).
+  `origin` = fork, `upstream` = dmidlo. The `mirror` branch is pushed and tracks `origin/mirror`.
 - [x] Working branch `mirror`. The upstream `agents.MD` rules are not followed in the fork (file removed).
 - [x] venv: `uv venv --python 3.12 .venv` and `uv pip install -e '.[test]'`. The system Python has no pip/ensurepip, so `uv` is installed in `~/.local/bin`.
   The upstream test baseline was skipped because that code is gone. `hdmirror` has its own tests (`pytest`, 16 passing).
