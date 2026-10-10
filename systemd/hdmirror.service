@@ -1,0 +1,10 @@
+[Unit]
+Description=hdmirror weekly HistData maintenance
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/hist_data_downloader/histdata.com-tools/.venv/bin/hdmirror maintain
+Nice=10
+IOSchedulingClass=idle

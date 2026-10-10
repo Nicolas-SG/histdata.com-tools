@@ -1,0 +1,20 @@
+# hdmirror configuration. Copy to ~/.config/hdmirror/mirror.toml
+# Every key is optional; these are the defaults.
+
+root = "/media/storage/Vegas_Files/Data bases/Hist Data"
+# parquet_root = "<root>/_parquet"
+
+# Processing order for backfill/maintain when --pairs is not given.
+pairs = [
+    "GBPUSD", "EURUSD", "USDCHF", "USDCAD", "XAUUSD",
+    "AUDUSD", "EURAUD", "EURNZD", "GBPAUD", "GBPNZD", "NZDUSD", "XAGUSD",
+]
+
+start = "200801"            # never ask for months before this
+delay_seconds = 4.0         # pause between files (be gentle with histdata.com)
+retries = 3                 # attempts per file, exponential backoff
+timeout = 60.0              # seconds per HTTP request
+recheck_months = 2          # maintain: re-check the current and previous month
+absent_recheck_days = 90    # re-probe months HistData had no file for
+notify = true               # desktop notification at the end of each run
+log_file = "~/.local/state/hdmirror/hdmirror.log"
