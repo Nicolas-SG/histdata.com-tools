@@ -202,3 +202,6 @@ removed from that branch; upstream history stays on `main`.
 - 2026-10-10: `status` found 1,356 months to fetch (2008+ through 202610). `convert` wrote Parquet for the
   1,322 existing archives in 2m13s with 0 failures. `backfill` for all 12 pairs started at about 13:05 local time,
   taking about 12 s per file.
+- 2026-10-10 16:30: backfill finished with exit 0. 1,356 downloaded, 1,356 converted to Parquet, 0 failed, 0 absent.
+  All 12 pairs are complete from 2008 (or each pair's first tick month) through 202610 (partial current month).
+  Disk use: zips 24G, Parquet 17G.
