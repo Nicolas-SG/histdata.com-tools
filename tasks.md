@@ -172,7 +172,7 @@ removed from that branch; upstream history stays on `main`.
 - [x] `hdmirror convert [--force]`
 
 ### G. Scheduling (weekly)
-- [x] systemd user timer `hdmirror.timer` (Sun 06:00, `Persistent=true`) → `hdmirror.service` (`maintain`).
+- [x] systemd user timer `hdmirror.timer` (Tue 06:00, `Persistent=true`; moved from Sunday on 2026-11-01) → `hdmirror.service` (`maintain`).
   Installed and enabled. Linger is enabled.
 - [ ] Mount guard: **intentionally not implemented**, because the drive mounts automatically (decision 2026-10-10).
   `hdmirror` already refuses to run if `root` does not exist, but it does not check which device holds it.
@@ -204,3 +204,13 @@ removed from that branch; upstream history stays on `main`.
 - 2026-10-10 16:30: backfill finished with exit 0. 1,356 downloaded, 1,356 converted to Parquet, 0 failed, 0 absent.
   All 12 pairs are complete from 2008 (or each pair's first tick month) through 202610 (partial current month).
   Disk use: zips 24G, Parquet 17G.
+
+## Weekly run review (2026-11-01)
+
+Reported: weekly runs seemed to download nothing. The downloader was working; a fresh EURUSD 202610 was identical
+to the local zip. Two real problems:
+
+- Timing: HistData's stamps were Sun 10-18 22:40 and Mon 10-26 10:27, so the Sunday 06:00 timer ran before each publish
+  and fetched data a week late. The Oct 25 run found nothing new. The timer now runs on Tuesday.
+- Wording: notifications led with "downloaded 0" even when files were refreshed. They now report files fetched,
+  newest tick and HistData's last publish date.

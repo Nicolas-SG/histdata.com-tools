@@ -86,3 +86,20 @@ def test_recheck_refreshes_only_when_histdata_is_newer(cfg):
     summary = Runner(cfg, state, client, sleep=lambda s: None).run([Job("EURUSD", "202609", RECHECK)])
     assert summary.refreshed == ["EURUSD:202609"]
     assert client.downloads == [("EURUSD", "202609")]
+
+
+def test_summary_reports_refreshes_and_quiet_runs_plainly(cfg):
+    path = write_zip(cfg.root, "EURUSD", "202609")
+    state = State(cfg.state_file)
+    state.record_file("EURUSD", "202609", path, remote_updated_at=UPDATED.isoformat())
+    client = FakeClient(cfg, {("EURUSD", "202609"): UPDATED})
+    quiet = Runner(cfg, state, client, sleep=lambda s: None).run([Job("EURUSD", "202609", RECHECK)])
+    assert quiet.lines() == [
+        "No new data: every checked month matches HistData",
+        "HistData last published: 2026-10-04 12:45",
+    ]
+
+    client.outcomes[("EURUSD", "202609")] = UPDATED + timedelta(days=7)
+    busy = Runner(cfg, state, client, sleep=lambda s: None).run([Job("EURUSD", "202609", RECHECK)])
+    assert busy.lines()[0] == "1 files fetched: 0 new months, 1 updated"
+    assert "Newest tick fetched: 2026-01-01 22:04 UTC" in busy.lines()

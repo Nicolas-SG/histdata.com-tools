@@ -56,8 +56,10 @@ hdmirror convert [--force]           # write missing/outdated Parquet files
    Parquet file.
 3. Retries months that failed before.
 
-HistData publishes the in-progress month and updates it over time, so the
-current month is refreshed every week until it closes.
+HistData publishes the in-progress month about once a week, between Sunday and
+Monday (EST), so the file ends at the previous Friday's close. `maintain` can
+only be as fresh as that publish. The last days of a month arrive with the first
+publish of the next month, which is why the previous month is re-checked too.
 
 Only one `backfill`/`maintain` can run at a time, enforced with a lock on
 `<root>/.mirror.lock`. Exit codes: 0 means success, 1 means some files failed,
@@ -75,7 +77,7 @@ systemctl --user list-timers hdmirror.timer
 journalctl --user -u hdmirror.service
 ```
 
-The timer runs on Sundays at 06:00. `Persistent=true` makes it catch up after
+The timer runs on Tuesdays at 06:00, after HistData's weekly publish. `Persistent=true` makes it catch up after
 the machine was off.
 
 ## Tests

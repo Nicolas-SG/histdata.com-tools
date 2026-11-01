@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -49,3 +50,8 @@ def convert(zip_file: Path, parquet_file: Path, pair: str, month: str) -> int:
     finally:
         temp.unlink(missing_ok=True)
     return frame.height
+
+
+def last_tick(parquet_file: Path) -> datetime:
+    """Return the newest timestamp in a Parquet file."""
+    return pl.scan_parquet(parquet_file).select(pl.col("timestamp").max()).collect().item()

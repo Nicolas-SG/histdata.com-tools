@@ -41,17 +41,32 @@ class Summary:
     converted: int = 0
     convert_failed: list[str] = field(default_factory=list)
     interrupted: bool = False
+    site_updated: datetime | None = None
+    latest_tick: datetime | None = None
 
     @property
     def ok(self) -> bool:
         return not (self.failed or self.convert_failed or self.interrupted)
 
     def lines(self) -> list[str]:
-        lines = [
-            f"downloaded {len(self.downloaded)}, refreshed {len(self.refreshed)}, "
-            f"unchanged {self.unchanged}, absent {len(self.absent)}, failed {len(self.failed)}",
-            f"parquet: converted {self.converted}, failed {len(self.convert_failed)}",
-        ]
+        fetched = len(self.downloaded) + len(self.refreshed)
+        lines = []
+        if fetched:
+            lines.append(f"{fetched} files fetched: {len(self.downloaded)} new months, {len(self.refreshed)} updated")
+        elif self.unchanged:
+            lines.append("No new data: every checked month matches HistData")
+        if self.unchanged and fetched:
+            lines.append(f"{self.unchanged} already current")
+        if self.latest_tick:
+            lines.append(f"Newest tick fetched: {self.latest_tick:%Y-%m-%d %H:%M} UTC")
+        if self.site_updated:
+            lines.append(f"HistData last published: {self.site_updated.astimezone(months.EST):%Y-%m-%d %H:%M}")
+        if self.absent:
+            lines.append(f"{len(self.absent)} months not published yet")
+        if self.failed:
+            lines.append(f"{len(self.failed)} failed")
+        if self.converted or self.convert_failed:
+            lines.append(f"Parquet: {self.converted} converted, {len(self.convert_failed)} failed")
         if self.failed:
             lines.append("failed: " + " ".join(self.failed[:20]))
         if self.convert_failed:
@@ -156,6 +171,7 @@ class Runner:
         for attempt in range(1, self.cfg.retries + 1):
             try:
                 page = self.client.page(job.pair, job.month)
+                self.summary.site_updated = page.updated_at or self.summary.site_updated
                 if job.reason == RECHECK and not is_newer(page, entry, target):
                     self.state.update(
                         job.pair, job.month,
@@ -210,8 +226,11 @@ class Runner:
 
     def _convert(self, job: Job, zip_file: Path) -> None:
         try:
-            convert.convert(zip_file, convert.parquet_path(self.cfg.parquet_root, job.pair, job.month), job.pair, job.month)
+            parquet_file = convert.parquet_path(self.cfg.parquet_root, job.pair, job.month)
+            convert.convert(zip_file, parquet_file, job.pair, job.month)
             self.summary.converted += 1
+            tick = convert.last_tick(parquet_file)
+            self.summary.latest_tick = max(tick, self.summary.latest_tick or tick)
         except Exception as err:  # a bad conversion must not stop the download queue
             self.summary.convert_failed.append(f"{job.pair}:{job.month}")
             log.error("%s:%s parquet conversion failed: %s", job.pair, job.month, err)

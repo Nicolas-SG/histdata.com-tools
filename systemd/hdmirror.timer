@@ -1,8 +1,8 @@
 [Unit]
-Description=Run hdmirror maintain every Sunday
+Description=Run hdmirror maintain every Tuesday, after HistData's weekend publish
 
 [Timer]
-OnCalendar=Sun *-*-* 06:00:00
+OnCalendar=Tue *-*-* 06:00:00
 RandomizedDelaySec=15min
 Persistent=true
 
